@@ -78,7 +78,7 @@ final class UseSimpleOnceClassTest extends BaseTestCase
         ];
     }
 
-    private function getExpectedLabels()
+    private function getExpectedCompletionLabels()
     {
         return [
             '->' => [
@@ -122,46 +122,42 @@ final class UseSimpleOnceClassTest extends BaseTestCase
 
         $actual_labels = $this->getCompletionLabels($content, 'B\A', $gap);
 
-        $expected_labels = $this->getExpectedLabels();
+        $expected_labels = $this->getExpectedCompletionLabels();
 
         $this->assertEqualsCanonicalizing($expected_labels[$gap], $actual_labels);
     }
 
-    public function dataCompatibleBehaviorsWithValid()
+    public function providerCompatibleBehaviors()
     {
-        $completionLabels = $this->getExpectedLabels();
+        $completionLabels = $this->getExpectedCompletionLabels();
         $data = [];
         foreach ($this->getAllProperties() as $property) {
-            if (in_array($property, $completionLabels['->'])) {
-                $key = 'Object-gap with ' . $property;
-                $data[$key] = ["echo (new A)->$property;"];
-            }
+            $key = 'Object-gap with ' . $property;
+            $isValid = in_array($property, $completionLabels['->']);
+            $data[$key] = ["echo (new A)->$property;", $isValid];
         }
         foreach ($this->getAllMethods() as $method) {
-            if (in_array($method, $completionLabels['->'])) {
-                $key = 'Object-gap with ' . $method;
-                $data[$key] = ["(new A)->$method();"];
-            }
-        }       
+            $key = 'Object-gap with ' . $method;
+            $isValid = in_array($method, $completionLabels['->']);
+            $data[$key] = ["(new A)->$method();", $isValid];
+        }
         foreach ($this->getAllProperties() as $property) {
-            if (in_array($property, $completionLabels['::'])) {
-                $key = 'Static-gap with ' . $property;
-                $data[$key] = ["echo A::\$$property;"];
-            }
+            $key = 'Static-gap with ' . $property;
+            $isValid = in_array($property, $completionLabels['::']);
+            $data[$key] = ["echo A::\$$property;", $isValid];
         }
         foreach ($this->getAllMethods() as $method) {
-            if (in_array($method, $completionLabels['::'])) {
-                $key = 'Static-gap with ' . $method;
-                $data[$key] = ["A::$method();"];
-            }
+            $key = 'Static-gap with ' . $method;
+            $isValid = in_array($method, $completionLabels['::']);
+            $data[$key] = ["A::$method();", $isValid];
         }
         return $data;
     }
 
     /**
-     * @dataProvider dataCompatibleBehaviorsWithValid
+     * @dataProvider providerCompatibleBehaviors
      */
-    public function testCompatibleBehaviorsWithValid($addon)
+    public function testCompatibleBehaviors($addon, $expectedIsValid)
     {
         $innerAddon = <<<'EOF'
                 public function __get(string $name) {}
@@ -179,6 +175,10 @@ final class UseSimpleOnceClassTest extends BaseTestCase
 
         $error = $this->findFirstError($content);
 
-        $this->assertNull($error);
+        if ($expectedIsValid) {
+            $this->assertNull($error);
+        } else {
+            $this->assertNotNull($error);
+        }
     }
 }
