@@ -6,6 +6,8 @@ namespace Psalm\Tests\Internal\Codebase\MethodGetCompletionItemsForClassishThing
 
 use Psalm\Codebase;
 use Psalm\Context;
+use Psalm\Exception\CodeException;
+use Psalm\Config;
 use Psalm\Internal\Analyzer\ProjectAnalyzer;
 use Psalm\Internal\Provider\FakeFileProvider;
 use Psalm\Internal\Provider\Providers;
@@ -79,5 +81,20 @@ abstract class BaseTestCase extends TestCase
             'object-gap' => ['->'],
             'static-gap' => ['::'],
         ];
+    }
+
+    protected function findFirstError(string $content): ?string
+    {
+        $this->codebase->config->setCustomErrorLevel('MissingReturnType', Config::REPORT_SUPPRESS);
+        $this->codebase->config->setCustomErrorLevel('MissingPropertyType', Config::REPORT_SUPPRESS);
+        $this->codebase->config->setCustomErrorLevel('MixedArgument', Config::REPORT_SUPPRESS);
+        $this->codebase->config->throw_exception = true;
+        try {
+            $this->addFile('somefile.php', $content);
+            $this->analyzeFile('somefile.php', new Context());
+            return null;
+        } catch (CodeException $e) {
+            return $e->getMessage();
+        }
     }
 }
