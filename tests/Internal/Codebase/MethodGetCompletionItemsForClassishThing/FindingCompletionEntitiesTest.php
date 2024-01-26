@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Psalm\Tests\Internal\Codebase;
+namespace Psalm\Tests\Internal\Codebase\MethodGetCompletionItemsForClassishThing;
 
 use Psalm\Codebase;
 use Psalm\Context;
@@ -20,7 +20,7 @@ use function array_map;
 /**
  * Fat tests for method `getCompletionItemsForClassishThing` of class `Psalm\Codebase`.
  */
-final class MethodGetCompletionItemsForClassishThingTest extends TestCase
+final class FindingCompletionEntitiesTest extends TestCase
 {
     private Codebase $codebase;
 
