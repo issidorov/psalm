@@ -50,16 +50,37 @@ final class UseSimpleOnceClassTest extends BaseTestCase
         return $content;
     }
 
-    /**
-     * @dataProvider providerGaps
-     */
-    public function testFindingCompletionEntities(string $gap): void
+    private function getAllProperties()
     {
-        $content = $this->getContent();
+        return [
+            'magicObjProp1',
+            'magicObjProp2',
+            'publicObjProp',
+            'protectedObjProp',
+            'privateObjProp',
+            'publicStaticProp',
+            'protectedStaticProp',
+            'privateStaticProp',
+        ];
+    }
 
-        $actual_labels = $this->getCompletionLabels($content, 'B\A', $gap);
+    private function getAllMethods()
+    {
+        return [
+            'magicObjMethod',
+            'magicStaticMethod',
+            'publicObjMethod',
+            'protectedObjMethod',
+            'privateObjMethod',
+            'publicStaticMethod',
+            'protectedStaticMethod',
+            'privateStaticMethod',
+        ];
+    }
 
-        $expected_labels = [
+    private function getExpectedLabels()
+    {
+        return [
             '->' => [
                 'magicObjProp1',
                 'magicObjProp2',
@@ -90,40 +111,51 @@ final class UseSimpleOnceClassTest extends BaseTestCase
                 'privateStaticMethod',
             ],
         ];
+    }
+
+    /**
+     * @dataProvider providerGaps
+     */
+    public function testFindingCompletionEntities(string $gap): void
+    {
+        $content = $this->getContent();
+
+        $actual_labels = $this->getCompletionLabels($content, 'B\A', $gap);
+
+        $expected_labels = $this->getExpectedLabels();
 
         $this->assertEqualsCanonicalizing($expected_labels[$gap], $actual_labels);
     }
 
     public function dataCompatibleBehaviorsWithValid()
     {
-        return [
-            'Object-gap with magicObjProp1' => ['echo (new A)->magicObjProp1;'],
-            'Object-gap with magicObjProp2' => ['echo (new A)->magicObjProp2;'],
-
-            'Object-gap with magicObjMethod' => ['(new A)->magicObjMethod();'],
-
-            'Object-gap with publicObjProp' => ['echo (new A)->publicObjProp;'],
-            'Object-gap with protectedObjProp' => ['echo (new A)->protectedObjProp;'],
-            'Object-gap with privateObjProp' => ['echo (new A)->privateObjProp;'],
-
-            'Object-gap with publicObjMethod' => ['(new A)->publicObjMethod();'],
-            'Object-gap with protectedObjMethod' => ['(new A)->protectedObjMethod();'],
-            'Object-gap with privateObjMethod' => ['(new A())->privateObjMethod();'],
-            
-            'Object-gap with publicStaticMethod' => ['(new A)->publicStaticMethod();'],
-            'Object-gap with protectedStaticMethod' => ['(new A)->protectedStaticMethod();'],
-            'Object-gap with privateStaticMethod' => ['(new A)->privateStaticMethod();'],
-
-            'Static-gap with magicStaticMethod' => ['A::magicStaticMethod();'],
-
-            'Static-gap with publicStaticProp' => ['echo A::$publicStaticProp;'],
-            'Static-gap with protectedStaticProp' => ['echo A::$protectedStaticProp;'],
-            'Static-gap with privateStaticProp' => ['echo A::$privateStaticProp;'],
-
-            'Static-gap with publicStaticMethod' => ['A::publicStaticMethod();'],
-            'Static-gap with protectedStaticMethod' => ['A::protectedStaticMethod();'],
-            'Static-gap with privateStaticMethod' => ['A::privateStaticMethod();'],
-        ];
+        $completionLabels = $this->getExpectedLabels();
+        $data = [];
+        foreach ($this->getAllProperties() as $property) {
+            if (in_array($property, $completionLabels['->'])) {
+                $key = 'Object-gap with ' . $property;
+                $data[$key] = ["echo (new A)->$property;"];
+            }
+        }
+        foreach ($this->getAllMethods() as $method) {
+            if (in_array($method, $completionLabels['->'])) {
+                $key = 'Object-gap with ' . $method;
+                $data[$key] = ["(new A)->$method();"];
+            }
+        }       
+        foreach ($this->getAllProperties() as $property) {
+            if (in_array($property, $completionLabels['::'])) {
+                $key = 'Static-gap with ' . $property;
+                $data[$key] = ["echo A::\$$property;"];
+            }
+        }
+        foreach ($this->getAllMethods() as $method) {
+            if (in_array($method, $completionLabels['::'])) {
+                $key = 'Static-gap with ' . $method;
+                $data[$key] = ["A::$method();"];
+            }
+        }
+        return $data;
     }
 
     /**
