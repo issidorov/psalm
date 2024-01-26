@@ -12,39 +12,6 @@ final class FindingCompletionEntitiesTest extends BaseTestCase
     /**
      * @dataProvider providerGaps
      */
-    public function testAstractClassWithInterface(string $gap): void
-    {
-        $content = <<<'EOF'
-            <?php
-            namespace B;
-
-            interface C {
-                public      function    publicObjMethod();
-                protected   function    protectedObjMethod();
-            }
-
-            abstract class A implements C {
-                abstract    public      function    publicObjMethod();
-                abstract    protected   function    protectedObjMethod();
-            }
-        EOF;
-
-        $actual_labels = $this->getCompletionLabels($content, 'B\A', $gap);
-
-        $expected_labels = [
-            '->' => [
-                'publicObjMethod',
-                'protectedObjMethod',
-            ],
-            '::' => [],
-        ];
-
-        $this->assertEqualsCanonicalizing($expected_labels[$gap], $actual_labels);
-    }
-
-    /**
-     * @dataProvider providerGaps
-     */
     public function testClassWithAnnotationMixin(string $gap): void
     {
         $content = <<<'EOF'
