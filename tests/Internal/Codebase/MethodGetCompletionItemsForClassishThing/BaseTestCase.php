@@ -64,7 +64,7 @@ abstract class BaseTestCase extends TestCase
         $this->codebase->config->setCustomErrorLevel('MixedArgument', Config::REPORT_SUPPRESS);
     }
 
-    abstract protected function getContent(string $innerAddon = '', string $outerAddon = ''): string;
+    abstract protected function getContent(): string;
 
     abstract protected function getAllProperties(): array;
 
@@ -92,12 +92,33 @@ abstract class BaseTestCase extends TestCase
         return $data;
     }
 
+    private function getNormalizedContent($params = [])
+    {
+        $content = $this->getContent();
+        $content = preg_replace_callback('/\<\<\w+\>\>/um', fn($match) => $params[$match[0]] ?? '', $content);
+        return $content;
+    }
+
     /**
      * @dataProvider providerCompatible
      */
     public function testCompatibleForInner(string $gap, string $label, string $addon)
     {
-        $content = $this->getContent($addon);
+        $innerAddonCode = <<<'EOF'
+                public function __get(string $name) {}
+                public function __call(string $name, array $arguments) {}
+                public static function __callStatic(string $name, array $arguments) {}
+
+                public function __test() {
+                    <<ADDON>>
+                }
+        EOF;
+
+        $innerAddonCode = str_replace('<<ADDON>>', $addon, $innerAddonCode);
+
+        $content = $this->getNormalizedContent([
+            '<<INNER_ADDON_CODE>>' => $innerAddonCode
+        ]);
 
         $this->addFile('somefile.php', $content);
         $this->analyzeFile('somefile.php', new Context());
@@ -124,7 +145,16 @@ abstract class BaseTestCase extends TestCase
      */
     public function testCompatibleForOuter(string $gap, string $label, string $addon)
     {
-        $content = $this->getContent('', $addon);
+        $innerAddonCode = <<<'EOF'
+                public function __get(string $name) {}
+                public function __call(string $name, array $arguments) {}
+                public static function __callStatic(string $name, array $arguments) {}
+        EOF;
+
+        $content = $this->getNormalizedContent([
+            '<<INNER_ADDON_CODE>>' => $innerAddonCode,
+            '<<OUTER_ADDON_CODE>>' => $addon,
+        ]);
 
         $this->addFile('somefile.php', $content);
         $this->analyzeFile('somefile.php', new Context());

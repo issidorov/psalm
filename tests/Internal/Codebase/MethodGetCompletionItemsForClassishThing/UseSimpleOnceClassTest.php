@@ -9,9 +9,9 @@ namespace Psalm\Tests\Internal\Codebase\MethodGetCompletionItemsForClassishThing
  */
 final class UseSimpleOnceClassTest extends BaseTestCase
 {
-    protected function getContent(string $innerAddon = '', string $outerAddon = ''): string
+    protected function getContent(): string
     {
-        $content = <<<'EOF'
+        return <<<'EOF'
             <?php
             namespace B;
 
@@ -20,6 +20,7 @@ final class UseSimpleOnceClassTest extends BaseTestCase
              * @property-read string $magicObjProp2
              * @method int magicObjMethod()
              * @method static string magicStaticMethod()
+             * <<ADDON_ANNOTATION>>
              */
             class A {
                 public      $publicObjProp;
@@ -38,22 +39,11 @@ final class UseSimpleOnceClassTest extends BaseTestCase
                 protected   static  function    protectedStaticMethod() {}
                 private     static  function    privateStaticMethod() {}
 
-                public function __get(string $name) {}
-                public function __call(string $name, array $arguments) {}
-                public static function __callStatic(string $name, array $arguments) {}
-
-                public function foo() {
-                    <<INNER_ADDON>>
-                }
+                <<INNER_ADDON_CODE>>
             }
 
-            <<OUTER_ADDON>>
+            <<OUTER_ADDON_CODE>>
         EOF;
-
-        $content = str_replace('<<INNER_ADDON>>', $innerAddon, $content);
-        $content = str_replace('<<OUTER_ADDON>>', $outerAddon, $content);
-
-        return $content;
     }
 
     protected function getAllProperties(): array
