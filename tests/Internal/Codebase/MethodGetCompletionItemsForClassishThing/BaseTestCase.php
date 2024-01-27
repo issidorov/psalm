@@ -6,6 +6,8 @@ namespace Psalm\Tests\Internal\Codebase\MethodGetCompletionItemsForClassishThing
 
 use Psalm\Codebase;
 use Psalm\Context;
+use Psalm\IssueBuffer;
+use Psalm\Internal\Analyzer\ClassLikeAnalyzer;
 use Psalm\Exception\CodeException;
 use Psalm\Config;
 use Psalm\Internal\Analyzer\ProjectAnalyzer;
@@ -56,6 +58,88 @@ abstract class BaseTestCase extends TestCase
         $this->project_analyzer->getCodebase()->store_node_types = true;
 
         $this->codebase->config->throw_exception = false;
+
+        $this->codebase->config->setCustomErrorLevel('MissingReturnType', Config::REPORT_SUPPRESS);
+        $this->codebase->config->setCustomErrorLevel('MissingPropertyType', Config::REPORT_SUPPRESS);
+        $this->codebase->config->setCustomErrorLevel('MixedArgument', Config::REPORT_SUPPRESS);
+    }
+
+    abstract protected function getContent(string $innerAddon = '', string $outerAddon = ''): string;
+
+    abstract protected function getAllProperties(): array;
+
+    abstract protected function getAllMethods(): array;
+
+    public function providerCompatible()
+    {
+        $data = [];
+        foreach ($this->getAllProperties() as $property) {
+            $key = 'Object-gap with ' . $property;
+            $data[$key] = ['->', $property, "echo (new A)->$property;"];
+        }
+        foreach ($this->getAllMethods() as $method) {
+            $key = 'Object-gap with ' . $method;
+            $data[$key] = ['->', $method, "(new A)->$method();"];
+        }
+        foreach ($this->getAllProperties() as $property) {
+            $key = 'Static-gap with ' . $property;
+            $data[$key] = ['::', $property, "echo A::\$$property;"];
+        }
+        foreach ($this->getAllMethods() as $method) {
+            $key = 'Static-gap with ' . $method;
+            $data[$key] = ['::', $method, "A::$method();"];
+        }
+        return $data;
+    }
+
+    /**
+     * @dataProvider providerCompatible
+     */
+    public function testCompatibleForInner(string $gap, string $label, string $addon)
+    {
+        $content = $this->getContent($addon);
+
+        $this->addFile('somefile.php', $content);
+        $this->analyzeFile('somefile.php', new Context());
+
+        $has_errors = (count(IssueBuffer::getIssuesDataForFile('somefile.php')) > 0);
+
+        $allow_visibilities = [
+            ClassLikeAnalyzer::VISIBILITY_PUBLIC,
+            ClassLikeAnalyzer::VISIBILITY_PROTECTED,
+            ClassLikeAnalyzer::VISIBILITY_PRIVATE,
+        ];
+        $items = $this->codebase->getCompletionItemsForClassishThing('B\A', $gap, false, $allow_visibilities);
+        $actual_labels = array_map(fn($item) => $item->label, $items);
+
+        if ($has_errors) {
+            $this->assertNotContains($label, $actual_labels);
+        } else {
+            $this->assertContains($label, $actual_labels);
+        }
+    }
+
+    /**
+     * @dataProvider providerCompatible
+     */
+    public function testCompatibleForOuter(string $gap, string $label, string $addon)
+    {
+        $content = $this->getContent('', $addon);
+
+        $this->addFile('somefile.php', $content);
+        $this->analyzeFile('somefile.php', new Context());
+
+        $has_errors = (count(IssueBuffer::getIssuesDataForFile('somefile.php')) > 0);
+
+        $allow_visibilities = [ClassLikeAnalyzer::VISIBILITY_PUBLIC];
+        $items = $this->codebase->getCompletionItemsForClassishThing('B\A', $gap, false, $allow_visibilities);
+        $actual_labels = array_map(fn($item) => $item->label, $items);
+
+        if ($has_errors) {
+            $this->assertNotContains($label, $actual_labels);
+        } else {
+            $this->assertContains($label, $actual_labels);
+        }
     }
 
     /**
@@ -83,12 +167,8 @@ abstract class BaseTestCase extends TestCase
         ];
     }
 
-    protected function findFirstError(string $content): ?string
+    protected function findError(string $content): ?string
     {
-        $this->codebase->config->setCustomErrorLevel('MissingReturnType', Config::REPORT_SUPPRESS);
-        $this->codebase->config->setCustomErrorLevel('MissingPropertyType', Config::REPORT_SUPPRESS);
-        $this->codebase->config->setCustomErrorLevel('MixedArgument', Config::REPORT_SUPPRESS);
-        $this->codebase->config->throw_exception = true;
         try {
             $this->addFile('somefile.php', $content);
             $this->analyzeFile('somefile.php', new Context());
