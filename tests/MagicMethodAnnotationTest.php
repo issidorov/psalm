@@ -1152,22 +1152,41 @@ class MagicMethodAnnotationTest extends TestCase
 
     public function providerSealAllMethodsWithStaticCallOnNonStatic()
     {
+        $code1 = <<<'EOF'
+          A::foo();
+        EOF;
+
+        $code2 = <<<'EOF'
+          class B extends A {
+            public static function bar(): void {
+              self::foo();
+            }
+          }
+        EOF;
+
         return [
-            'seal_all_methods is true' => [true],
-            'seal_all_methods is false' => [false],
+            'seal_all_methods is true and usage code1' => [true, $code1, 'InvalidStaticInvocation'],
+            'seal_all_methods is false and usage code1' => [false, $code1, 'InvalidStaticInvocation'],
+            'seal_all_methods is true and usage code2' => [true, $code2, 'NonStaticSelfCall'],
+            'seal_all_methods is false and usage code2' => [false, $code2, 'NonStaticSelfCall'],
         ];
     }
 
     /**
      * @dataProvider providerSealAllMethodsWithStaticCallOnNonStatic
      */
-    public function testSealAllMethodsWithStaticCallOnNonStatic(bool $seal_all_methods_value): void
+    public function testSealAllMethodsWithStaticCallOnNonStatic(
+        bool $seal_all_methods_value,
+        string $code,
+        string $error_message
+    ): void 
     {
         Config::getInstance()->seal_all_methods = $seal_all_methods_value;
 
         $this->addFile(
             'somefile.php',
-            '<?php
+            <<<'EOF'
+            <?php
               /**
                * @method string foo()
                */
@@ -1176,11 +1195,9 @@ class MagicMethodAnnotationTest extends TestCase
                 public static function __callStatic(string $method, array $args) {}
               }
 
-              A::foo();
-              ',
+            EOF . $code
         );
 
-        $error_message = 'InvalidStaticInvocation';
         $this->expectException(CodeException::class);
         $this->expectExceptionMessage($error_message);
         $this->analyzeFile('somefile.php', new Context());
