@@ -55,6 +55,8 @@ abstract class BaseTestCase extends TestCase
         $this->project_analyzer->getCodebase()->store_node_types = true;
 
         $this->codebase->config->throw_exception = false;
+        $this->codebase->config->seal_all_methods = true;
+        $this->codebase->config->seal_all_properties = true;
 
         $this->codebase->config->setCustomErrorLevel('MissingReturnType', Config::REPORT_SUPPRESS);
         $this->codebase->config->setCustomErrorLevel('MissingPropertyType', Config::REPORT_SUPPRESS);
@@ -164,6 +166,7 @@ abstract class BaseTestCase extends TestCase
                     echo (new self)->publicStaticProp;
                     echo (new self)->protectedStaticProp;
                     echo (new self)->privateStaticProp;
+                    echo (new self)->notExistsProp;
 
                     (new self)->magicObjMethod();
                     (new self)->magicStaticMethod();
@@ -173,6 +176,7 @@ abstract class BaseTestCase extends TestCase
                     (new self)->publicStaticMethod();
                     (new self)->protectedStaticMethod();
                     (new self)->privateStaticMethod();
+                    (new self)->notExistsMethod();
                 }
         EOF;
 
@@ -185,6 +189,7 @@ abstract class BaseTestCase extends TestCase
                     echo self::$publicStaticProp;
                     echo self::$protectedStaticProp;
                     echo self::$privateStaticProp;
+                    echo self::$notExistsProp;
 
                     self::magicObjMethod();
                     self::magicStaticMethod();
@@ -194,6 +199,7 @@ abstract class BaseTestCase extends TestCase
                     self::publicStaticMethod();
                     self::protectedStaticMethod();
                     self::privateStaticMethod();
+                    self::notExistsMethod();
                 }
         EOF;
 
@@ -214,6 +220,7 @@ abstract class BaseTestCase extends TestCase
             'publicStaticProp',
             'protectedStaticProp',
             'privateStaticProp',
+            'notExistsProp',
 
             'magicObjMethod',
             'magicStaticMethod',
@@ -223,6 +230,7 @@ abstract class BaseTestCase extends TestCase
             'publicStaticMethod',
             'protectedStaticMethod',
             'privateStaticMethod',
+            'notExistsMethod',
         ];
     }
 }
