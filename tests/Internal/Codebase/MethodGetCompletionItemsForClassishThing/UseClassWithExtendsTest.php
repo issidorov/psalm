@@ -37,6 +37,10 @@ final class UseClassWithExtendsTest extends BaseTestCase
                 public      static  function    publicStaticMethod() {}
                 protected   static  function    protectedStaticMethod() {}
                 private     static  function    privateStaticMethod() {}
+
+                public function __get($name) {}
+                public function __call($name, $attributes) {}
+                public static function __callStatic($name, $attributes) {}
             }
 
             class A extends C {
@@ -69,6 +73,10 @@ final class UseClassWithExtendsTest extends BaseTestCase
 
                 'publicStaticMethod',
                 'protectedStaticMethod',
+
+                '__get',
+                '__call',
+                '__callStatic',
             ],
             '::' => [
                 'magicStaticMethod',
@@ -77,6 +85,8 @@ final class UseClassWithExtendsTest extends BaseTestCase
 
                 'publicStaticMethod',
                 'protectedStaticMethod',
+
+                '__callStatic',
             ],
         ];
 

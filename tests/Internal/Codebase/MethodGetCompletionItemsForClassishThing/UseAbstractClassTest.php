@@ -40,6 +40,10 @@ final class UseAbstractClassTest extends BaseTestCase
                 public      static  function    publicStaticMethod() {}
                 protected   static  function    protectedStaticMethod() {}
                 private     static  function    privateStaticMethod() {}
+
+                public function __get($name) {}
+                public function __call($name, $attributes) {}
+                public static function __callStatic($name, $attributes) {}
             }
         EOF;
     }
@@ -74,6 +78,10 @@ final class UseAbstractClassTest extends BaseTestCase
                 'publicStaticMethod',
                 'protectedStaticMethod',
                 'privateStaticMethod',
+
+                '__get',
+                '__call',
+                '__callStatic',
             ],
             '::' => [
                 'magicStaticMethod',
@@ -85,6 +93,8 @@ final class UseAbstractClassTest extends BaseTestCase
                 'publicStaticMethod',
                 'protectedStaticMethod',
                 'privateStaticMethod',
+
+                '__callStatic',
             ],
         ];
 
