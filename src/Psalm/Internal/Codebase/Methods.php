@@ -349,7 +349,8 @@ final class Methods
         MethodIdentifier $method_id,
         ?StatementsSource $source = null,
         ?array $args = null,
-        ?Context $context = null
+        ?Context $context = null,
+        bool $with_pseudo = false,
     ): array {
         $fq_class_name = $method_id->fq_class_name;
         $method_name = $method_id->method_name;
@@ -368,7 +369,7 @@ final class Methods
             }
         }
 
-        $declaring_method_id = $this->getDeclaringMethodId($method_id);
+        $declaring_method_id = $this->getDeclaringMethodId($method_id, $with_pseudo);
 
         $callmap_id = $declaring_method_id ?? $method_id;
 
@@ -424,7 +425,7 @@ final class Methods
         }
 
         if ($declaring_method_id) {
-            $storage = $this->getStorage($declaring_method_id);
+            $storage = $this->getStorage($declaring_method_id, $with_pseudo);
 
             $params = $storage->params;
 

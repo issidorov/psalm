@@ -294,7 +294,7 @@ class CallAnalyzer
             ) !== false;
         }
 
-        $method_params = $codebase->methods->getMethodParams($method_id, $statements_analyzer, $args, $context);
+        $method_params = $codebase->methods->getMethodParams($method_id, $statements_analyzer, $args, $context, true);
 
         $fq_class_name = $method_id->fq_class_name;
         $method_name = $method_id->method_name;
