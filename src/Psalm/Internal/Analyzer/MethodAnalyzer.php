@@ -111,7 +111,7 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
 
         $original_method_id = $method_id;
 
-        $method_id = $codebase_methods->getDeclaringMethodId($method_id);
+        $method_id = $codebase_methods->getDeclaringMethodId($method_id, true);
 
         if (!$method_id) {
             if (InternalCallMapHandler::inCallMap((string) $original_method_id)) {
@@ -121,7 +121,7 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
             throw new LogicException('Declaring method for ' . $original_method_id . ' should not be null');
         }
 
-        $storage = $codebase_methods->getStorage($method_id);
+        $storage = $codebase_methods->getStorage($method_id, true);
 
         if (!$storage->is_static) {
             if ($self_call) {
@@ -176,6 +176,9 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
                 : null,
             null,
             $code_location->file_path,
+            true,
+            false,
+            true
         )) {
             return true;
         }

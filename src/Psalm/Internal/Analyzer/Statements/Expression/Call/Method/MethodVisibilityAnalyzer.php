@@ -65,7 +65,7 @@ final class MethodVisibilityAnalyzer
             }
         }
 
-        $declaring_method_id = $codebase_methods->getDeclaringMethodId($method_id);
+        $declaring_method_id = $codebase_methods->getDeclaringMethodId($method_id, true);
 
         if (!$declaring_method_id) {
             if ($method_name === '__construct'
@@ -109,7 +109,7 @@ final class MethodVisibilityAnalyzer
             return null;
         }
 
-        $storage = $codebase->methods->getStorage($declaring_method_id);
+        $storage = $codebase->methods->getStorage($declaring_method_id, true);
         $visibility = $storage->visibility;
 
         if ($appearing_method_name

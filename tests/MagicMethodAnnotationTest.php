@@ -1150,6 +1150,42 @@ class MagicMethodAnnotationTest extends TestCase
         ];
     }
 
+    public function providerSealAllMethodsWithStaticCallOnNonStatic()
+    {
+        return [
+            'seal_all_methods is true' => [true],
+            'seal_all_methods is false' => [false],
+        ];
+    }
+
+    /**
+     * @dataProvider providerSealAllMethodsWithStaticCallOnNonStatic
+     */
+    public function testSealAllMethodsWithStaticCallOnNonStatic(bool $seal_all_methods_value): void
+    {
+        Config::getInstance()->seal_all_methods = $seal_all_methods_value;
+
+        $this->addFile(
+            'somefile.php',
+            '<?php
+              /**
+               * @method string foo()
+               */
+              class A {
+                public function __call(string $method, array $args) {}
+                public static function __callStatic(string $method, array $args) {}
+              }
+
+              A::foo();
+              ',
+        );
+
+        $error_message = 'InvalidStaticInvocation';
+        $this->expectException(CodeException::class);
+        $this->expectExceptionMessage($error_message);
+        $this->analyzeFile('somefile.php', new Context());
+    }
+
     public function testSealAllMethodsWithoutFoo(): void
     {
         Config::getInstance()->seal_all_methods = true;
