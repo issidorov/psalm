@@ -1177,7 +1177,7 @@ class MagicMethodAnnotationTest extends TestCase
      */
     public function testSealAllMethodsWithStaticCallOnNonStatic(
         bool $seal_all_methods_value,
-        string $code,
+        string $test_code,
         string $error_message
     ): void 
     {
@@ -1195,7 +1195,7 @@ class MagicMethodAnnotationTest extends TestCase
                 public static function __callStatic(string $method, array $args) {}
               }
 
-            EOF . $code
+            EOF . $test_code
         );
 
         $this->expectException(CodeException::class);
