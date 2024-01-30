@@ -262,7 +262,7 @@ final class ExistingAtomicStaticCallAnalyzer
             );
         }
 
-        $method_storage = $codebase->methods->getUserMethodStorage($method_id);
+        $method_storage = $codebase->methods->getUserMethodStorage($method_id, true);
 
         if ($method_storage) {
             if ($method_storage->abstract

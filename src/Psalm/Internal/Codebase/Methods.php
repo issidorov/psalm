@@ -1085,9 +1085,9 @@ final class Methods
         return $fq_class_name . '::' . $storage->cased_name;
     }
 
-    public function getUserMethodStorage(MethodIdentifier $method_id): ?MethodStorage
+    public function getUserMethodStorage(MethodIdentifier $method_id, bool $with_pseudo = false): ?MethodStorage
     {
-        $declaring_method_id = $this->getDeclaringMethodId($method_id);
+        $declaring_method_id = $this->getDeclaringMethodId($method_id, $with_pseudo);
 
         if (!$declaring_method_id) {
             if (InternalCallMapHandler::inCallMap((string) $method_id)) {
@@ -1097,7 +1097,7 @@ final class Methods
             throw new UnexpectedValueException('$storage should not be null for ' . $method_id);
         }
 
-        $storage = $this->getStorage($declaring_method_id);
+        $storage = $this->getStorage($declaring_method_id, $with_pseudo);
 
         if (!$storage->location) {
             return null;

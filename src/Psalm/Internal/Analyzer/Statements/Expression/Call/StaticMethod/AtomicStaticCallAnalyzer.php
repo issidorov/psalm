@@ -667,30 +667,30 @@ final class AtomicStaticCallAnalyzer
                     }
                 }
 
-                $array_values = array_map(
-                    static fn(PhpParser\Node\Arg $arg): PhpParser\Node\Expr\ArrayItem => new VirtualArrayItem(
-                        $arg->value,
-                        null,
-                        false,
-                        $arg->getAttributes(),
-                    ),
-                    $args,
-                );
+                // $array_values = array_map(
+                //     static fn(PhpParser\Node\Arg $arg): PhpParser\Node\Expr\ArrayItem => new VirtualArrayItem(
+                //         $arg->value,
+                //         null,
+                //         false,
+                //         $arg->getAttributes(),
+                //     ),
+                //     $args,
+                // );
 
-                $args = [
-                    new VirtualArg(
-                        new VirtualString((string) $method_id, $stmt_name->getAttributes()),
-                        false,
-                        false,
-                        $stmt_name->getAttributes(),
-                    ),
-                    new VirtualArg(
-                        new VirtualArray($array_values, $stmt->getAttributes()),
-                        false,
-                        false,
-                        $stmt->getAttributes(),
-                    ),
-                ];
+                // $args = [
+                //     new VirtualArg(
+                //         new VirtualString((string) $method_id, $stmt_name->getAttributes()),
+                //         false,
+                //         false,
+                //         $stmt_name->getAttributes(),
+                //     ),
+                //     new VirtualArg(
+                //         new VirtualArray($array_values, $stmt->getAttributes()),
+                //         false,
+                //         false,
+                //         $stmt->getAttributes(),
+                //     ),
+                // ];
 
                 // $method_id = new MethodIdentifier(
                 //     $fq_class_name,
