@@ -1897,18 +1897,21 @@ final class Codebase
                 try {
                     $class_storage = $this->classlike_storage_provider->get($atomic_type->value);
 
+                    $method_names = [];
                     $method_storages = [];
                     foreach ($class_storage->declaring_method_ids as $declaring_method_id) {
                         try {
-                            $method_storages[] = $this->methods->getStorage($declaring_method_id);
+                            $method_storage = $this->methods->getStorage($declaring_method_id);
+                            $method_storages[] = $method_storage;
+                            $method_names[] = $method_storage->cased_name;
                         } catch (UnexpectedValueException $e) {
                             error_log($e->getMessage());
                         }
                     }
-                    if ($gap === '->') {
+                    if ($gap === '->' && in_array('__call', $method_names)) {
                         $method_storages += $class_storage->pseudo_methods;
                     }
-                    if ($gap === '::') {
+                    if ($gap === '::' && in_array('__callStatic', $method_names)) {
                         $method_storages += $class_storage->pseudo_static_methods;
                     }
 
@@ -1944,7 +1947,7 @@ final class Codebase
                         }
                     }
 
-                    if ($gap === '->') {
+                    if ($gap === '->' && array_intersect(['__get', '__set'], $method_names)) {
                         $pseudo_property_types = [];
                         foreach ($class_storage->pseudo_property_get_types as $property_name => $type) {
                             $pseudo_property_types[$property_name] = new CompletionItem(
