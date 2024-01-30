@@ -692,10 +692,10 @@ final class AtomicStaticCallAnalyzer
                     ),
                 ];
 
-                $method_id = new MethodIdentifier(
-                    $fq_class_name,
-                    '__callstatic',
-                );
+                // $method_id = new MethodIdentifier(
+                //     $fq_class_name,
+                //     '__callstatic',
+                // );
             } elseif ($found_method_and_class_storage
                 && ($config->use_phpdoc_method_without_magic_or_parent || $class_storage->parent_class)
             ) {
@@ -1090,6 +1090,9 @@ final class AtomicStaticCallAnalyzer
         if ($pseudo_method_storage = $static_class_storage->pseudo_static_methods[$method_name_lc] ?? null) {
             return [$pseudo_method_storage, $static_class_storage];
         }
+        // if ($pseudo_method_storage = $static_class_storage->pseudo_methods[$method_name_lc] ?? null) {
+        //     return [$pseudo_method_storage, $static_class_storage];
+        // }
 
         $ancestors = $static_class_storage->class_implements + $static_class_storage->parent_classes;
 
