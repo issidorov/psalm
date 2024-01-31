@@ -180,14 +180,19 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
             $code_location->file_path,
             true,
             false,
-            $with_pseudo,
+            $with_pseudo
+                || $codebase->config->use_phpdoc_method_without_magic_or_parent,
         )) {
             return true;
         }
 
         if ($with_pseudo) {
             if (IssueBuffer::accepts(
-                new UndefinedMagicMethod('Magic method ' . $method_id . ' does not exist', $code_location, (string) $method_id),
+                new UndefinedMagicMethod(
+                    'Magic method ' . $method_id . ' does not exist',
+                    $code_location,
+                    (string) $method_id,
+                ),
                 $suppressed_issues,
             )) {
                 return false;
