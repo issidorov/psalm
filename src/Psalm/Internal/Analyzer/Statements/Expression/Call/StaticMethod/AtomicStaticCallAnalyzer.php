@@ -744,14 +744,18 @@ final class AtomicStaticCallAnalyzer
             }
         }
 
-        $does_method_exist = MethodAnalyzer::checkMethodExists(
-            $codebase,
-            $method_id,
-            new CodeLocation($statements_analyzer, $stmt),
-            $statements_analyzer->getSuppressedIssues(),
-            $context->calling_method_id,
-            $callstatic_method_exists,
-        );
+        if ($class_storage->hasSealedMethods($config) || !$callstatic_method_exists) {
+            $does_method_exist = MethodAnalyzer::checkMethodExists(
+                $codebase,
+                $method_id,
+                new CodeLocation($statements_analyzer, $stmt),
+                $statements_analyzer->getSuppressedIssues(),
+                $context->calling_method_id,
+                $callstatic_method_exists,
+            );
+        } else {
+            $does_method_exist = null;
+        }
 
         if (!$does_method_exist) {
             if (ArgumentsAnalyzer::analyze(
