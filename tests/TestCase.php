@@ -155,6 +155,29 @@ class TestCase extends BaseTestCase
         return $this->getName($withDataSet);
     }
 
+    public static function assertHasIssueType(string $expected, string $message = '')
+    {
+        $issueMessages = [];
+        $res = false;
+        $issues = IssueBuffer::getIssuesData();
+        foreach ($issues as $file_issues) {
+            foreach ($file_issues as $issue) {
+                $fullIssueMessage = $issue->type . ' - ' . $issue->file_name . ':' . $issue->line_from . ':' . $issue->column_from . ' - ' . $issue->message;
+                $issueMessages[] = $fullIssueMessage;
+                if (preg_match('/\b' . preg_quote($expected, '/') . '\b/', $fullIssueMessage)) {
+                    $res = true;
+                }
+            }
+        }
+        $message = "Failed asserting that issue with \"$expected\".";
+        if (count($issueMessages)) {
+            $message .= "\n" . 'Other exists issues:' . "\n  - " . implode("\n  - ", $issueMessages);
+        } else {
+            $message .= ' Issues is not exists.';
+        }
+        self::assertTrue($res, $message);
+    }
+
     public static function assertArrayKeysAreStrings(array $array, string $message = ''): void
     {
         $validKeys = array_filter($array, 'is_string', ARRAY_FILTER_USE_KEY);

@@ -82,15 +82,19 @@ trait InvalidCodeAnalysisTestTrait
 
         // $error_message = preg_replace('/ src[\/\\\\]somefile\.php/', ' src/somefile.php', $error_message);
 
-        $this->expectException(CodeException::class);
+        // $this->expectException(CodeException::class);
 
-        $this->expectExceptionMessageMatches('/\b' . preg_quote($error_message, '/') . '\b/');
+        // $this->expectExceptionMessageMatches('/\b' . preg_quote($error_message, '/') . '\b/');
 
         $codebase = $this->project_analyzer->getCodebase();
         $codebase->enterServerMode();
         $codebase->config->visitPreloadedStubFiles($codebase);
 
+        $codebase->config->throw_exception = false;
+
         $this->addFile($file_path, $code);
         $this->analyzeFile($file_path, new Context());
+
+        $this->assertHasIssueType($error_message);
     }
 }
