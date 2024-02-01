@@ -2014,7 +2014,8 @@ final class Codebase
                         );
                     }
 
-                    if ($gap === '->') {
+                    $gaps = ['->', '::'];
+                    foreach ($gaps as $gap) {
                         foreach ($class_storage->namedMixins as $mixin) {
                             if (in_array($mixin->value, $ignore_fq_class_names)) {
                                 continue;
@@ -2028,19 +2029,6 @@ final class Codebase
                             );
                             $completion_items = [...$completion_items, ...$mixin_completion_items];
                         }
-                    }
-                    foreach ($class_storage->namedMixins as $mixin) {
-                        if (in_array($mixin->value, $ignore_fq_class_names)) {
-                            continue;
-                        }
-                        $mixin_completion_items = $this->getCompletionItemsForClassishThing(
-                            $mixin->value,
-                            '::',
-                            $snippets_supported,
-                            [ClassLikeAnalyzer::VISIBILITY_PUBLIC],
-                            [$type_string, ...$ignore_fq_class_names],
-                        );
-                        $completion_items = [...$completion_items, ...$mixin_completion_items];
                     }
                 } catch (Exception $e) {
                     error_log($e->getMessage());
