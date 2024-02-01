@@ -18,6 +18,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
             class A {
                 <<CLASS_BODY>>
 
+                <<ADDON_TEST_METHOD>>
+
                 // public function __get($name) {}
                 // public function __call($name, $attributes) {}
                 // public static function __callStatic($name, $attributes) {}
@@ -38,6 +40,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
              */
             class A {
                 <<CLASS_BODY>>
+
+                <<ADDON_TEST_METHOD>>
 
                 // public function __get($name) {}
                 // public function __call($name, $attributes) {}
@@ -60,6 +64,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
             class A {
                 <<CLASS_BODY>>
 
+                <<ADDON_TEST_METHOD>>
+
                 public function __get($name) {}
                 // public function __call($name, $attributes) {}
                 // public static function __callStatic($name, $attributes) {}
@@ -80,6 +86,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
              */
             class A {
                 <<CLASS_BODY>>
+
+                <<ADDON_TEST_METHOD>>
 
                 // public function __get($name) {}
                 public function __call($name, $attributes) {}
@@ -102,6 +110,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
             class A {
                 <<CLASS_BODY>>
 
+                <<ADDON_TEST_METHOD>>
+
                 // public function __get($name) {}
                 // public function __call($name, $attributes) {}
                 public static function __callStatic($name, $attributes) {}
@@ -122,6 +132,8 @@ class UseSimpleOnceClassTest extends BaseTestCase
              */
             class A {
                 <<CLASS_BODY>>
+
+                <<ADDON_TEST_METHOD>>
 
                 // public function __get($name) {}
                 // public function __call($name, $attributes) {}

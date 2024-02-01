@@ -62,6 +62,7 @@ abstract class BaseTestCase extends TestCase
         $this->codebase->config->setCustomErrorLevel('MissingPropertyType', Config::REPORT_SUPPRESS);
         $this->codebase->config->setCustomErrorLevel('MixedArgument', Config::REPORT_SUPPRESS);
         $this->codebase->config->setCustomErrorLevel('MissingParamType', Config::REPORT_SUPPRESS);
+        $this->codebase->config->setCustomErrorLevel('InaccessibleProperty', Config::REPORT_SUPPRESS);
     }
 
     public function provider()
@@ -153,8 +154,6 @@ abstract class BaseTestCase extends TestCase
                 public      static  function    publicStaticMethod() {}
                 protected   static  function    protectedStaticMethod() {}
                 private     static  function    privateStaticMethod() {}
-
-                <<ADDON_TEST_METHOD>>
         EOF;
 
         $addonTestMethodsByGap['->'] = <<<'EOF'
