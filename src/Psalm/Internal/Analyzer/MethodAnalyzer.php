@@ -13,6 +13,7 @@ use Psalm\Issue\InvalidEnumMethod;
 use Psalm\Issue\InvalidStaticInvocation;
 use Psalm\Issue\MethodSignatureMustOmitReturnType;
 use Psalm\Issue\NonStaticSelfCall;
+use Psalm\Issue\UndefinedMagicMethod;
 use Psalm\Issue\UndefinedMethod;
 use Psalm\IssueBuffer;
 use Psalm\StatementsSource;
@@ -111,7 +112,7 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
 
         $original_method_id = $method_id;
 
-        $method_id = $codebase_methods->getDeclaringMethodId($method_id);
+        $method_id = $codebase_methods->getDeclaringMethodId($method_id, true);
 
         if (!$method_id) {
             if (InternalCallMapHandler::inCallMap((string) $original_method_id)) {
@@ -121,7 +122,7 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
             throw new LogicException('Declaring method for ' . $original_method_id . ' should not be null');
         }
 
-        $storage = $codebase_methods->getStorage($method_id);
+        $storage = $codebase_methods->getStorage($method_id, true);
 
         if (!$storage->is_static) {
             if ($self_call) {
@@ -165,7 +166,8 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
         MethodIdentifier $method_id,
         CodeLocation $code_location,
         array $suppressed_issues,
-        ?string $calling_method_id = null
+        ?string $calling_method_id = null,
+        bool $with_pseudo = false
     ): ?bool {
         if ($codebase->methods->methodExists(
             $method_id,
@@ -176,15 +178,32 @@ final class MethodAnalyzer extends FunctionLikeAnalyzer
                 : null,
             null,
             $code_location->file_path,
+            true,
+            false,
+            $with_pseudo
+                || $codebase->config->use_phpdoc_method_without_magic_or_parent,
         )) {
             return true;
         }
 
-        if (IssueBuffer::accepts(
-            new UndefinedMethod('Method ' . $method_id . ' does not exist', $code_location, (string) $method_id),
-            $suppressed_issues,
-        )) {
-            return false;
+        if ($with_pseudo) {
+            if (IssueBuffer::accepts(
+                new UndefinedMagicMethod(
+                    'Magic method ' . $method_id . ' does not exist',
+                    $code_location,
+                    (string) $method_id,
+                ),
+                $suppressed_issues,
+            )) {
+                return false;
+            }
+        } else {
+            if (IssueBuffer::accepts(
+                new UndefinedMethod('Method ' . $method_id . ' does not exist', $code_location, (string) $method_id),
+                $suppressed_issues,
+            )) {
+                return false;
+            }
         }
 
         return null;
