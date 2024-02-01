@@ -594,6 +594,40 @@ class MixinAnnotationTest extends TestCase
                     '$g' => 'list<FooModel>',
                 ],
             ],
+            'deepMixinExtends' => [
+                'code' => '<?php
+                    class ParentClassA {
+                        public function getString() : string {
+                            return "hello";
+                        }
+                        public static function getInt() : int {
+                            return 5;
+                        }
+                        public function __call(string $name, array $args) {}
+                        public static function __callStatic(string $name, array $args) {}
+                    }
+
+                    /** @mixin ParentClassA */
+                    class ParentClassB {
+                        public function __call(string $name, array $args) {}
+                        public static function __callStatic(string $name, array $args) {}
+                    }
+
+                    /** @mixin ParentClassB */
+                    class Child {
+                        public function __call(string $name, array $args) {}
+                        public static function __callStatic(string $name, array $args) {}
+                    }
+
+                    $child = new Child();
+
+                    $a = $child->getString();
+                    $b = $child::getInt();',
+                'assertions' => [
+                    '$a' => 'string',
+                    '$b' => 'int',
+                ],
+            ],
         ];
     }
 
