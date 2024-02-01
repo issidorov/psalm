@@ -1226,6 +1226,36 @@ class MagicMethodAnnotationTest extends TestCase
                     }',
                 'error_message' => 'UndefinedVariable',
             ],
+            'staticInvocation' => [
+                'code' => '<?php
+                    /**
+                     * @method string foo()
+                     */
+                    class A {
+                        public function __call(string $method, array $args) {}
+                        public static function __callStatic(string $method, array $args) {}
+                    }
+
+                    A::foo();',
+                'error_message' => 'InvalidStaticInvocation',
+            ],
+            'nonStaticSelfCall' => [
+                'code' => '<?php
+                    /**
+                     * @method string foo()
+                     */
+                    class A {
+                        public function __call(string $method, array $args) {}
+                        public static function __callStatic(string $method, array $args) {}
+                    }
+
+                    class B extends A {
+                        public static function bar(): void {
+                            self::foo();
+                        }
+                    }',
+                'error_message' => 'NonStaticSelfCall',
+            ],
         ];
     }
 
