@@ -594,7 +594,7 @@ class MixinAnnotationTest extends TestCase
                     '$g' => 'list<FooModel>',
                 ],
             ],
-            'deepMixinExtends' => [
+            'recursiveMixins' => [
                 'code' => '<?php
                     class ParentClassA {
                         public int $prop = 10;
