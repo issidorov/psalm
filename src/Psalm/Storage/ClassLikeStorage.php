@@ -517,6 +517,22 @@ final class ClassLikeStorage implements HasAttributesInterface
         return false;
     }
 
+    public function getAllMixinsByRecursive(Codebase $codebase)
+    {
+        $res = [];
+        foreach ($this->namedMixins as $mixin) {
+            $mixin_declaring_class_storage = $codebase->classlike_storage_provider->get(
+                $mixin->value,
+            );
+            $res = array_merge(
+                $res,
+                [$mixin],
+                $mixin_declaring_class_storage->getAllMixinsByRecursive($codebase)
+            );
+        }
+        return $res;
+    }
+
     /**
      * Get the template constraint types for the class.
      *

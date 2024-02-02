@@ -594,6 +594,43 @@ class MixinAnnotationTest extends TestCase
                     '$g' => 'list<FooModel>',
                 ],
             ],
+            'recursiveMixins' => [
+                'code' => '<?php
+                    class ParentClassA {
+                        public int $prop = 10;
+                        public function getString() : string {
+                            return "hello";
+                        }
+                        public static function getInt() : int {
+                            return 5;
+                        }
+                    }
+
+                    /** @mixin ParentClassA */
+                    class ParentClassB {
+                        public function __call(string $name, array $args) {}
+                        public static function __callStatic(string $name, array $args) {}
+                        public function __get(string $name) {}
+                    }
+
+                    /** @mixin ParentClassB */
+                    class Child {
+                        public function __call(string $name, array $args) {}
+                        public static function __callStatic(string $name, array $args) {}
+                        public function __get(string $name) {}
+                    }
+
+                    $child = new Child();
+
+                    $a = $child->getString();
+                    $b = $child::getInt();
+                    $c = $child->prop;',
+                'assertions' => [
+                    '$a' => 'string',
+                    '$b' => 'int',
+                    '$c' => 'int',
+                ],
+            ],
         ];
     }
 
