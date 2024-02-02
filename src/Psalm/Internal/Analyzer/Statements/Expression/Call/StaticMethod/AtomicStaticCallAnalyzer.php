@@ -392,7 +392,8 @@ final class AtomicStaticCallAnalyzer
             && $class_storage->mixin_declaring_fqcln
             && $class_storage->namedMixins
         ) {
-            foreach ($class_storage->namedMixins as $mixin) {
+            $mixins = $class_storage->getAllMixinsByRecursive($codebase);
+            foreach ($mixins as $mixin) {
                 $new_method_id = new MethodIdentifier(
                     $mixin->value,
                     $method_name_lc,

@@ -265,7 +265,8 @@ final class AtomicPropertyFetchAnalyzer
 
         if (!$naive_property_exists) {
             if ($class_storage->namedMixins) {
-                foreach ($class_storage->namedMixins as $mixin) {
+                $mixins = $class_storage->getAllMixinsByRecursive($codebase);
+                foreach ($mixins as $mixin) {
                     $new_property_id = $mixin->value . '::$' . $prop_name;
 
                     try {
