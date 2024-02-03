@@ -630,6 +630,55 @@ class EnumTest extends TestCase
                 'ignored_issues' => [],
                 'php_version' => '8.1',
             ],
+            'allowPropertiesOnIntersectionsWithEnumInterfaces' => [
+                'code' => <<<'PHP'
+                    <?php
+                    interface I {}
+
+                    interface UE extends UnitEnum {}
+                    interface BE extends BackedEnum {}
+
+                    function f(I $i): void {
+                        if ($i instanceof BackedEnum) {
+                            echo $i->name;
+                        }
+                        if ($i instanceof UnitEnum) {
+                            echo $i->name;
+                        }
+                        if ($i instanceof UE) {
+                            echo $i->name;
+                        }
+                        if ($i instanceof BE) {
+                            echo $i->name;
+                        }
+                    }
+                    PHP,
+                'assertions' => [],
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'stringBackedEnumCaseValueFromStringGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: string
+                    {
+                        case Foo = \DATE_ATOM;
+                    }
+                ',
+                'assertions' => [],
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'intBackedEnumCaseValueFromIntGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: int
+                    {
+                        case Foo = \UPLOAD_ERR_OK;
+                    }
+                ',
+                'assertions' => [],
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
         ];
     }
 
@@ -1074,6 +1123,50 @@ class EnumTest extends TestCase
                     enum Bar: int
                     {
                         case Foo = Foo::FOO;
+                    }
+                ',
+                'error_message' => 'InvalidEnumCaseValue',
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'invalidStringBackedEnumCaseValueFromStringGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: string
+                    {
+                        case Foo = \PHP_VERSION_ID;
+                    }
+                ',
+                'error_message' => 'InvalidEnumCaseValue',
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'invalidIntBackedEnumCaseValueFromIntGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: int
+                    {
+                        case Foo = \PHP_BINARY;
+                    }
+                ',
+                'error_message' => 'InvalidEnumCaseValue',
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'invalidStringBackedEnumCaseValueFromIntGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: string
+                    {
+                        case Foo = \PHP_BINARY;
+                    }
+                ',
+                'error_message' => 'InvalidEnumCaseValue',
+                'ignored_issues' => [],
+                'php_version' => '8.1',
+            ],
+            'invalidIntBackedEnumCaseValueFromStringGlobalConstant' => [
+                'code' => '<?php
+                    enum Bar: int
+                    {
+                        case Foo = \PHP_VERSION_ID;
                     }
                 ',
                 'error_message' => 'InvalidEnumCaseValue',
