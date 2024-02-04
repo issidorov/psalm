@@ -596,6 +596,9 @@ class MixinAnnotationTest extends TestCase
             ],
             'recursiveMixins' => [
                 'code' => '<?php
+                    /**
+                     * @template T
+                     */
                     class ParentClassA {
                         public int $prop = 10;
                         public function getString() : string {
@@ -604,16 +607,30 @@ class MixinAnnotationTest extends TestCase
                         public static function getInt() : int {
                             return 5;
                         }
+                        /**
+                         * @return T
+                         * @psalm-suppress InvalidReturnType
+                         */
+                        public function getTemplated1() {}
                     }
 
-                    /** @mixin ParentClassA */
+                    /**
+                     * @template T1
+                     * @template T2
+                     * @mixin ParentClassA<T1>
+                     */
                     class ParentClassB {
+                        /**
+                         * @return T2
+                         * @psalm-suppress InvalidReturnType
+                         */
+                        public function getTemplated2() {}
                         public function __call(string $name, array $args) {}
                         public static function __callStatic(string $name, array $args) {}
                         public function __get(string $name) {}
                     }
 
-                    /** @mixin ParentClassB */
+                    /** @mixin ParentClassB<int, string> */
                     class Child {
                         public function __call(string $name, array $args) {}
                         public static function __callStatic(string $name, array $args) {}
@@ -624,11 +641,15 @@ class MixinAnnotationTest extends TestCase
 
                     $a = $child->getString();
                     $b = $child::getInt();
-                    $c = $child->prop;',
+                    $c = $child->prop;
+                    $d = $child->getTemplated1();
+                    $e = $child->getTemplated2();',
                 'assertions' => [
                     '$a' => 'string',
                     '$b' => 'int',
                     '$c' => 'int',
+                    '$d' => 'int',
+                    '$e' => 'string',
                 ],
             ],
         ];

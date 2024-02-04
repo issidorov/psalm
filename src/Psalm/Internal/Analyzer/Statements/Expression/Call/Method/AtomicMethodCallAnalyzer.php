@@ -831,11 +831,49 @@ final class AtomicMethodCallAnalyzer extends CallAnalyzer
     ): array {
         $naive_method_exists = false;
 
-        $mixins = $class_storage->getAllMixinsByRecursive($codebase);
-        foreach ($mixins as $mixin) {
+        foreach ($class_storage->namedMixins as $mixin) {
             if (!$class_storage->mixin_declaring_fqcln) {
                 continue;
             }
+
+            $mixin_declaring_class_storage = $codebase->classlike_storage_provider->get(
+                $class_storage->mixin_declaring_fqcln,
+            );
+
+            $mixin_class_template_params = ClassTemplateParamCollector::collect(
+                $codebase,
+                $mixin_declaring_class_storage,
+                $codebase->classlike_storage_provider->get($fq_class_name),
+                null,
+                $lhs_type_part,
+                $lhs_var_id === '$this',
+            );
+
+            $mixin_lhs_type_part = $mixin->replaceTemplateTypesWithArgTypes(
+                new TemplateResult([], $mixin_class_template_params ?: []),
+                $codebase,
+            );
+
+            $lhs_type_expanded = TypeExpander::expandUnion(
+                $codebase,
+                new Union([$mixin_lhs_type_part]),
+                $mixin_declaring_class_storage->name,
+                $fq_class_name,
+                $class_storage->parent_class,
+                true,
+                false,
+                $class_storage->final,
+            );
+
+            $_lhs_type_part = $lhs_type_expanded->getSingleAtomic();
+
+            if ($_lhs_type_part instanceof TNamedObject) {
+                $mixin_lhs_type_part = $_lhs_type_part;
+            }
+
+            $mixin_class_storage = $codebase->classlike_storage_provider->get($mixin->value);
+
+            $mixin_fq_class_name = $mixin_class_storage->name;
 
             $new_method_id = new MethodIdentifier(
                 $mixin->value,
@@ -856,49 +894,40 @@ final class AtomicMethodCallAnalyzer extends CallAnalyzer
                 true,
                 $context->insideUse(),
             )) {
-                $mixin_declaring_class_storage = $codebase->classlike_storage_provider->get(
-                    $class_storage->mixin_declaring_fqcln,
-                );
-
-                $mixin_class_template_params = ClassTemplateParamCollector::collect(
-                    $codebase,
-                    $mixin_declaring_class_storage,
-                    $codebase->classlike_storage_provider->get($fq_class_name),
-                    null,
-                    $lhs_type_part,
-                    $lhs_var_id === '$this',
-                );
-
-                $lhs_type_part = $mixin->replaceTemplateTypesWithArgTypes(
-                    new TemplateResult([], $mixin_class_template_params ?: []),
-                    $codebase,
-                );
-
-                $lhs_type_expanded = TypeExpander::expandUnion(
-                    $codebase,
-                    new Union([$lhs_type_part]),
-                    $mixin_declaring_class_storage->name,
-                    $fq_class_name,
-                    $class_storage->parent_class,
-                    true,
-                    false,
-                    $class_storage->final,
-                );
-
-                $new_lhs_type_part = $lhs_type_expanded->getSingleAtomic();
-
-                if ($new_lhs_type_part instanceof TNamedObject) {
-                    $lhs_type_part = $new_lhs_type_part;
-                }
-
-                $mixin_class_storage = $codebase->classlike_storage_provider->get($mixin->value);
-
-                $fq_class_name = $mixin_class_storage->name;
-                $mixin_class_storage->mixin_declaring_fqcln = $class_storage->mixin_declaring_fqcln;
-                $class_storage = $mixin_class_storage;
                 $naive_method_exists = true;
-                $method_id = $new_method_id;
+                break;
             }
+
+            if ($mixin_class_storage->mixin_declaring_fqcln
+                && $mixin_class_storage->namedMixins
+            ) {
+                [$mixin_lhs_type_part, $mixin_class_storage, $naive_method_exists, $new_method_id, $mixin_fq_class_name]
+                    = self::handleRegularMixins(
+                        $mixin_class_storage,
+                        $mixin_lhs_type_part,
+                        $method_name_lc,
+                        $codebase,
+                        $context,
+                        $new_method_id,
+                        $source,
+                        $stmt,
+                        $statements_analyzer,
+                        $mixin_fq_class_name,
+                        $lhs_var_id,
+                    );
+                if ($naive_method_exists) {
+                    $naive_method_exists = true;
+                    break;
+                }
+            }
+        }
+
+        if ($naive_method_exists) {
+            $lhs_type_part = $mixin_lhs_type_part;
+            $fq_class_name = $mixin_fq_class_name;
+            $mixin_class_storage->mixin_declaring_fqcln = $class_storage->mixin_declaring_fqcln;
+            $class_storage = $mixin_class_storage;
+            $method_id = $new_method_id;
         }
 
         return [
