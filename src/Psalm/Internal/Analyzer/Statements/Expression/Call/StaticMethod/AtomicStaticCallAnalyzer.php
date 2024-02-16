@@ -1017,6 +1017,22 @@ final class AtomicStaticCallAnalyzer
                 return $new_lhs_type;
             }
         }
+        foreach ($class_storage->namedMixins as $mixin) {
+            $mixin_class_storage = $codebase->classlike_storage_provider->get($mixin->value);
+            $new_lhs_type = self::handleRegularMixins(
+                $mixin_class_storage,
+                $lhs_type_part,
+                $method_name_lc,
+                $codebase,
+                $context,
+                $stmt_name,
+                $statements_analyzer,
+                $fq_class_name,
+            );
+            if ($new_lhs_type) {
+                return $new_lhs_type;
+            }
+        }
         return null;
     }
 
